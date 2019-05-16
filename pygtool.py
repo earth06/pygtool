@@ -5,15 +5,7 @@ import cartopy.util as cutil
 import xarray as xr
 import pandas as pd
 """
-~~~~version info~~~~~~~~~~~~~~~
-update 2018/10/15 by onishi
-update 2018/10/31 add method that get sigma, pa and beta 
-under updating 2018/11/7  add method that get xarray.dataset
-update 2018/11/29 change the way of grid info
-update 2019/01/11 add new func:to_netcdf() method:getDatetimeIndex()
-update 2019/01/14 bug fix to_dataarray()
-update 2019/01/15 replace missing value to np.nan & add function to get zonal mean
-update 2019/01/29 enable to return date without time info
+
 """
 class read3D:
     """
@@ -31,10 +23,10 @@ class read3D:
     getheader()
     getDate 
     """
-    head = ("head",">i")
-    tail = ("tail",">i")
-    head2 = ("head2",">i")
-    tail2 = ("tail2",">i") 
+    head = ("head",">i4")
+    tail = ("tail",">i4")
+    head2 = ("head2",">i4")
+    tail2 = ("tail2",">i4") 
     def __init__(self,file,count=1,x=128,y=64,z=36):
         """
         Parameter
@@ -64,7 +56,7 @@ class read3D:
         chunk=np.fromfile(data,dtype=dt,count=count)
         self.chunk = chunk
         data.close()
-    def getarr(self,timestep=0,cyclic=True,na_values=-999,miss=False):
+    def getarr(self,timestep=0,cyclic=False,na_values=-999,miss=False):
         """
         get ndarray(z=36,y=64,x=128)
         
@@ -109,6 +101,12 @@ class read3D:
         if (not timeinfo):
             label=label[0:10]
         return label
+    def getFortranheader_footer(self,timestep=0):
+        head1=self.chunk[timestep]['head']
+        head2=self.chunk[timestep]['head2']
+        tail1=self.chunk[timestep]['tail']
+        tail2=self.chunk[timestep]['tail2']
+        return head1,head2,tail1,tail2   
     def getDatetimeIndex(self,timestep=0,freq='MS'):
         """
         get pd.DatetimeIndex
@@ -123,7 +121,7 @@ class read3D:
         datetime :pd.DatetimeIndex (default return monthly)
         """
         sday=self.getDate(timestep=0)
-        eday=self.getDate(timestep=self.count)
+        eday=self.getDate(timestep=self.count-1)
         datetime=pd.date_range(sday,eday,freq=freq)
         return datetime
     def to_dataarray(self,end=1,cyclic=False):
@@ -164,7 +162,7 @@ class readlon():
         chunk=np.fromfile(data,dtype=dt)
         self.chunk = chunk
         data.close()
-    def getlon(self,cyclic=True):
+    def getlon(self,cyclic=False):
         lon = self.chunk[0]['arr']
         if cyclic:
             lon = np.append(lon,[360.0])
@@ -247,7 +245,7 @@ class read2D(read3D):
     def __init__(self,file,count=1,x=128,y=64,z=None):
         super().__init__(file,count,x,y,z)
         pass
-    def getarr(self,timestep=0,cyclic=True,na_values=-999,miss=False):
+    def getarr(self,timestep=0,cyclic=False,na_values=-999,miss=False):
         """
         get ndarray((y=64,x=128))
         
@@ -288,6 +286,7 @@ def to_netcdf(lon,lat,datetime,arr
          
     )
     return ds
+
 ######################################################################
 def weighted_mean(data,grid=(128,64),dim='2d',xr=[0,None],yr=[0,None],cyclic=False):
     """
@@ -326,7 +325,36 @@ def weighted_mean(data,grid=(128,64),dim='2d',xr=[0,None],yr=[0,None],cyclic=Fal
     weighteddata = np.nansum(data[sy:ey,sx:ex],axis=(0,1))\
                    /np.nansum(harea[sy:ey,sx:ex]) 
     return weighteddata
- 
+def weighted(arr,x=128,y=64,cyclic=False):
+    """
+    Parameter
+    --------------
+    arr  :np.ndarray((64,128))
+    x,y  :int  grid
+    cyclic :boolean
+    Return
+    --------------
+    weighted_arr :np.ndarray((2,64,128))
+    """
+    gridfile='/home/onishi/GRID/harea'+str(x)+'x'+str(y)+'_2d'
+    harea=read2D(gridfile,x=x,y=y).getarr(cyclic=cyclic)
+    weighted_arr=np.concatenate([arr*harea,harea]).reshape((2,64,128))
+    return weighted_arr
+
+def weighted_mean2(weighted_arr,axis=(1,2)):
+    """
+    Parameter
+    ---------------
+    weighted_arr :np.ndarray((2,64,128))
+    Return
+    ---------------
+    zonal_mean
+    """
+    temp=weighted_arr.mean(axis=axis)
+    numer=temp[0]
+    denomi=temp[1]
+    zonal_mean=numer/denomi
+    return zonal_mean
 def corre_coef(x,y):
     """
     args  type
