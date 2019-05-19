@@ -1,6 +1,5 @@
 import numpy as np
 import sys
-sys.path.append('/home/onishi/Pylib')
 def weighted_mean(arr,area):
     """
     Parameter
