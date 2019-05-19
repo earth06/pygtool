@@ -4,6 +4,7 @@ import datetime
 import cartopy.util as cutil
 import xarray as xr
 import pandas as pd
+import gtutil
 """
 
 """
@@ -152,7 +153,7 @@ class readlon():
     tail2 = ("tail2",">i")
     def __init__(self,x=128):
         self.x=x
-        file='/home/onishi/GTAXDIR/GTAXLOC.GLON'+str(self.x)
+        file='./GTAXLOC.GLON'+str(self.x)
         data=open(file,'br')
         dt = np.dtype([self.head
                        ,("header",">64S16")
@@ -286,135 +287,3 @@ def to_netcdf(lon,lat,datetime,arr
          
     )
     return ds
-
-######################################################################
-def weighted_mean(data,grid=(128,64),dim='2d',xr=[0,None],yr=[0,None],cyclic=False):
-    """
-    return weighted regional average
-    passed argument are only data
-    this function return global weighted average 
-   
-    args     type       default
-    -------------------------------
-    data    : np.ndarray (128,64) only to dim data now
-    grid    : int,tuple : (128,64)
-    dim     : string    : '2d'
-    xr      : int,list  : [0,None]
-    yr      : int,list  : [0,None]
-    cyclic  : bool      : False
-    
-    return
-    -------------------------------
-    weighteddata :real
-  
-    """
-    sx,ex=xr[0],xr[1]
-    sy,ey=yr[0],yr[1]
-    if ex == None:
-        ex=data.shape[-1]
-    if ey == None:
-        ey=data.shape[0]
-    print(sx,ex)
-    gridfile='/home/onishi/GRID/harea'+str(grid[0])+'x'+str(grid[1])+'_'+dim
-    if dim =='2d':
-        harea=read2D(gridfile,x=grid[0],y=grid[1]).getarr(cyclic=cyclic)
-    else:
-        raise NameError(dim+'is Invalid dimension')
-    harea = harea*(data/data)  #consider NaN value
-    data = data *harea
-    weighteddata = np.nansum(data[sy:ey,sx:ex],axis=(0,1))\
-                   /np.nansum(harea[sy:ey,sx:ex]) 
-    return weighteddata
-def weighted(arr,x=128,y=64,cyclic=False):
-    """
-    Parameter
-    --------------
-    arr  :np.ndarray((64,128))
-    x,y  :int  grid
-    cyclic :boolean
-    Return
-    --------------
-    weighted_arr :np.ndarray((2,64,128))
-    """
-    gridfile='/home/onishi/GRID/harea'+str(x)+'x'+str(y)+'_2d'
-    harea=read2D(gridfile,x=x,y=y).getarr(cyclic=cyclic)
-    weighted_arr=np.concatenate([arr*harea,harea]).reshape((2,64,128))
-    return weighted_arr
-
-def weighted_mean2(weighted_arr,axis=(1,2)):
-    """
-    Parameter
-    ---------------
-    weighted_arr :np.ndarray((2,64,128))
-    Return
-    ---------------
-    zonal_mean
-    """
-    temp=weighted_arr.mean(axis=axis)
-    numer=temp[0]
-    denomi=temp[1]
-    zonal_mean=numer/denomi
-    return zonal_mean
-def corre_coef(x,y):
-    """
-    args  type
-    -------------------------
-    x     np.ndarray((time,y,x))
-    y     np.ndarray((time,y,x))
-    
-    return  type
-    -------------------------
-    correlation  np.ndarray((y,x))
-    """
-    xmean=x.mean(axis=0)
-    ymean=y.mean(axis=0)
-    xyarr=x*y
-    xymean=xyarr.mean(axis=0)
-    x2mean=(x**2).mean(axis=0)
-    y2mean=(y**2).mean(axis=0)
-    xystd=xymean-(x.mean(axis=0)*y.mean(axis=0))
-    correlation=(xymean-xmean*ymean)/np.sqrt((x2mean-xmean**2)*(y2mean-ymean**2))
-    return correlation
-
-def zscore(x,axis=None,ddof=0):
-    """ 
-    return zscore standalization
-           x =(x - x.mean)/x.std
-    average=0 std=1
-
-    Parameters
-    -------------------
-    x : numpy.ndarray(x,y)
-    axis :int 0 #caliculate each col
-              1 #           each row
-    ddof :int 0 #when caliculate std, devide by n
-              1 #                   , devide by n-1
-    Returns
-    --------------------
-    zcore : np.ndarray(x,y)
-    """
-    xmean=x.mean(axis=axis,keepdims=True)
-    xstd=np.std(x,axis=axis,keepdims=True,ddof=ddof)
-    zscore  =(x-xmean)/xstd
-    return zscore
-
-def min_max(x,axis=None):
-    """
-    return min_max standalization
-           x = (x-x.min)/(x.max-x.min)
-    min=0 max=1
-
-    Parameters
-    -------------------
-    x : numpy.ndarray(x,y)
-    axis :int 0 #caliculate each col
-              1 #           each row
-
-    Returns
-    --------------------
-    result : np.ndarray(x,y)
-    """
-    xmin =x.min(axis=axis,keepdims=True)
-    xmax =x.max(axis=axis,keepdims=True)
-    result = (x-xmin)/(xmax-xmin)
-    return result
