@@ -44,6 +44,10 @@ xx,yy=pygtool.readgrid().getmesh()
 ```
 ## Install
 
+## Future Plan
+add simple plotting function as `gtplot`
+add method to generate xarray.Dataset
+add method to save np.ndarray as gtool format
 ## Contribution
 
 ## Licence
