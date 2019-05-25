@@ -1,4 +1,10 @@
 import numpy as np
+import sys
+sys.path.append('/home/onishi/Pylib')
+
+month=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+season=['JJA','SON','DJF','MAM']
+mdays=[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 def weighted_mean(arr,area):
     """
     Parameter

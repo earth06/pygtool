@@ -1,12 +1,12 @@
-# coding: utf-8
 import numpy as np
 import datetime
 import cartopy.util as cutil
 import xarray as xr
 import pandas as pd
+import sys
+sys.path.append('/home/onishi/Pylib')
 import gtutil
 """
-
 """
 class read3D:
     """
@@ -108,7 +108,7 @@ class read3D:
         tail1=self.chunk[timestep]['tail']
         tail2=self.chunk[timestep]['tail2']
         return head1,head2,tail1,tail2   
-    def getDatetimeIndex(self,timestep=0,freq='MS'):
+    def getDatetimeIndex(self,start=0,end=None,timestep=0,freq='MS'):
         """
         get pd.DatetimeIndex
  
@@ -121,23 +121,27 @@ class read3D:
         ---------------
         datetime :pd.DatetimeIndex (default return monthly)
         """
-        sday=self.getDate(timestep=0)
-        eday=self.getDate(timestep=self.count-1)
+        if ( end == None ):
+            end = self.count-1
+        sday=self.getDate(timestep=start)
+        eday=self.getDate(timestep=end)
         datetime=pd.date_range(sday,eday,freq=freq)
         return datetime
-    def to_dataarray(self,end=1,cyclic=False):
+    def to_dataarray(self,start=0,end=None,cyclic=False):
+        if end== None:
+            end=self.count
         if cyclic:
             x = self.x+1
         else:
             x = self.x
         if self.z == None:
-            dataarray=np.zeros((end,self.y,x))
-            for i in range(end):
-                dataarray[i,:,:]=self.getarr(timestep=i,cyclic=cyclic)
+            dataarray=np.zeros((end-start,self.y,x))
+            for i in range(end-start):
+                dataarray[i,:,:]=self.getarr(timestep=start+i,cyclic=cyclic)
         else:
-            dataarray=np.zeros((end,self.z,self.y,x))
-            for i in range(end):
-                dataarray[i,:,:,:]=self.getarr(timestep=i,cyclic=cyclic) 
+            dataarray=np.zeros((end-start,self.z,self.y,x))
+            for i in range(end-start):
+                dataarray[i,:,:,:]=self.getarr(timestep=start+i,cyclic=cyclic) 
         return dataarray
     def to_dataset(self):
         ds = 'Null'
@@ -153,7 +157,7 @@ class readlon():
     tail2 = ("tail2",">i")
     def __init__(self,x=128):
         self.x=x
-        file='./GTAXLOC.GLON'+str(self.x)
+        file='/home/onishi/GTAXDIR/GTAXLOC.GLON'+str(self.x)
         data=open(file,'br')
         dt = np.dtype([self.head
                        ,("header",">64S16")
@@ -168,7 +172,10 @@ class readlon():
         if cyclic:
             lon = np.append(lon,[360.0])
         return lon        
-    
+    def showlon(self,cyclic=False):
+        lon=self.getlon(cyclic=cyclic)
+        for i in range(len(lon)):
+            print(i,':',lon[i])
 class readlat():
     head = ("head",">i")
     tail = ("tail",">i")
@@ -189,6 +196,10 @@ class readlat():
     def getlat(self):
         lat = self.chunk[0]['arr']
         return lat
+    def showlat(self):
+        lat = self.getlat()
+        for i in range(len(lat)):
+            print(i,':',lat[i])
 class readgrid():
     def __init__(self,x=128,y=64):
         self.x=x
@@ -201,26 +212,34 @@ class readgrid():
         x,y=self.getlonlat(cyclic=cyclic)
         xx,yy=np.meshgrid(x,y)
         return xx,yy
-class readalt(read3D):
+
+
+class readalt():
     """
     read sigma
     if you need sigma,pa,beta, set count=3
     """
-    def __init__(self,file,count=1,x=1,y=1,z=36):
-        super().__init__(file,count,x,y,z)
-        pass
-    def getalt(self):
-        """
-        Parameter
-        --------------
-        None
-        Return
-        --------------
-        lonarray  :numpy.ndarray(36)
-        """
-        sig = self.chunk[0]['arr']
+
+    head = ("head",">i")
+    tail = ("tail",">i")
+    head2 = ("head2",">i")
+    tail2 = ("tail2",">i")
+    def __init__(self,z=36):
+        self.z=z
+        file='/home/onishi/GTAXDIR/GTAXLOC.HETA'+str(self.z)
+        data=open(file,'br')
+        dt = np.dtype([self.head
+                       ,("header",">64S16")
+                       ,self.tail,self.head2
+                       ,("arr",">"+str(self.z)+"f")
+                       ,self.tail2])     #big endian
+        chunk=np.fromfile(data,dtype=dt,count=3)
+        self.chunk = chunk
+        data.close()
+    def getsig(self):
+        sig=self.chunk[0]['arr']
         return sig
-    def getsigma(self):
+    def getsig_pa_beta(self):
         """
         Parameter
         ----------------
@@ -228,13 +247,14 @@ class readalt(read3D):
 
         Return
         ------------------
+        sig  :np.ndarray(z)
         pa   :np.ndarray(z)
         beta :np.ndarray(z)
         """
-        sigma = self.chunk[0]['arr']
-        pa = self.chunk[1]['arr']
-        beta = self.chunk[2]['arr']
-        return pa,beta
+        sig=self.chunk[0]['arr']
+        pa=self.chunk[1]['arr']
+        beta=self.chunk[2]['arr']
+        return sig,pa,beta
 class read2D(read3D):
     """
     read surface
@@ -287,3 +307,4 @@ def to_netcdf(lon,lat,datetime,arr
          
     )
     return ds
+
