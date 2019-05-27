@@ -289,7 +289,7 @@ class read2D(read3D):
             arr[arr <= na_values] = np.nan
         if cyclic:
             arr = cutil.add_cyclic_point(arr)
-        print(self.getdate(timestep=timestep))
+        print(self.getDate(timestep=timestep))
         return arr
 
 def to_netcdf(lon,lat,datetime,arr
