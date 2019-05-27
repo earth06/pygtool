@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 sys.path.append('/home/onishi/Pylib')
 import gtutil
+import gtplot 
 """
 """
 class read3D:
@@ -79,6 +80,7 @@ class read3D:
 
         if cyclic:
             arr = cutil.add_cyclic_point(arr)
+        print(self.getDate(timestep=timestep))
         return arr
     def getheader(self,timestep=0):
 #        print(self.chunk[timestep]['header'])
@@ -287,6 +289,7 @@ class read2D(read3D):
             arr[arr <= na_values] = np.nan
         if cyclic:
             arr = cutil.add_cyclic_point(arr)
+        print(self.getdate(timestep=timestep))
         return arr
 
 def to_netcdf(lon,lat,datetime,arr
