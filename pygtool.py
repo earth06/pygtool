@@ -1,10 +1,9 @@
 import numpy as np
 import datetime
 import cartopy.util as cutil
+import carto_kit as ckit
 import xarray as xr
 import pandas as pd
-import sys
-sys.path.append('/home/onishi/Pylib')
 import gtutil
 import gtplot 
 """

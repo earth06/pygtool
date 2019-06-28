@@ -1,10 +1,24 @@
 import numpy as np
-import sys
-sys.path.append('/home/onishi/Pylib')
 
 month=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 season=['JJA','SON','DJF','MAM']
 mdays=[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+reg=[   'AMN', 'AMM', 'AMS', 'AFN', 'AFS',\
+        'EUR', 'CEU', 'SBR', 'IND', 'CHN',\
+        'JPN', 'IDN', 'AUS', 'TLD']
+head = ("head",">i4")
+tail = ("tail",">i4")
+head2 = ("head2",">i4")
+tail2 = ("tail2",">i4") 
+gthead = ("header",">64S16")
+
+ffmt=(head,tail,head2,tail2)
+#def lonlabel(left=):
+
+#def latlabel(left=-90,right=90,dlat=30):
+#    latlist=[]
+#    for i in range(lfet,right,dlat)
+
 def weighted_mean(arr,area):
     """
     Parameter
