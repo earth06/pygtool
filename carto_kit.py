@@ -67,10 +67,11 @@ def set_geogrid(ax,resolution='110m'
         ax.axes.tick_params(labelsize=labelsize)
     return ax
 def set_feature(ax,scale='110m'
-              ,landalpha=0.7
-              ,oceanalpha=0.7
-              ,lakealpha=0.5
-              ,riveralpha=0.5):
+              ,LAND=True,OCEAN=True,RIVERS=False,LAKES=False
+              ,landalpha=0.7,landcolor=[0.9375 , 0.9375 , 0.859375]
+              ,oceanalpha=0.7,oceancolor=[0.59375 , 0.71484375, 0.8828125]
+              ,lakealpha=0.5,lakecolor=[0.59375 , 0.71484375, 0.8828125]
+              ,riveralpha=0.5,rivercolor=[0.59375 , 0.71484375, 0.8828125]):
     '''
     set LAND ,OCEAN,RIVERS,LAKES color
     parameter
@@ -81,21 +82,31 @@ def set_feature(ax,scale='110m'
     oceanlapha:float 0.8
     lakealpha :float 0.5
     riveralpha:float 0.5
-    rivercolor,riveralpha
+    *color    :colorcode
+    LAND,OCEAN:bool  fill color when True (default True)
+    RIVERS,LAKES:bool as above (default False)
     return
     ----------
     ax    :as above
     '''
-    ax.add_feature(cfeature.LAND.with_scale(scale)
-                ,alpha=landalpha)
-    ax.add_feature(cfeature.OCEAN.with_scale(scale)
-                ,alpha=oceanalpha)
-    ax.add_feature(cfeature.COASTLINE.with_scale(scale))
+    if LAND:
+        ax.add_feature(cfeature.LAND.with_scale(scale)
+                ,alpha=landalpha
+                ,facecolor=landcolor)
+    if OCEAN:
+        ax.add_feature(cfeature.OCEAN.with_scale(scale)
+                ,alpha=oceanalpha
+                ,facecolor=oceancolor)
+#    ax.add_feature(cfeature.COASTLINE.with_scale(scale))
 #    ax.add_feature(cfeature.BORDERS, linestyle=':')
-    ax.add_feature(cfeature.LAKES.with_scale(scale)
-                , alpha=lakealpha)
-    ax.add_feature(cfeature.RIVERS.with_scale(scale)
-                ,alpha=riveralpha)
+    if LAKES:
+        ax.add_feature(cfeature.LAKES.with_scale(scale)
+                , alpha=lakealpha
+                ,facecolor=lakecolor)
+    if RIVERS:
+        ax.add_feature(cfeature.RIVERS.with_scale(scale)
+                ,alpha=riveralpha
+                ,facecolor=rivercolor)
     return ax
 
 def Polarmap(ax):

@@ -66,14 +66,19 @@ def set_latticks(ax,dlat=15,labelsize=16):
     ax.xaxis.set_major_formatter(latformatter)
     ax.xaxis.set_tick_params(labelsize=labelsize)
     return ax
-
+def YYlabel(ax,base=1,month=12,day=1,labelsize=14):
+    ax.xaxis.set_major_locator(mdates.YearLocator(base=1,month=month,day=day))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    ax.xaxis.set_minor_locator(plt.NullLocator())
+    ax.xaxis.set_minor_formatter(plt.NullFormatter())
+    return ax 
 
 def MMlabel(ax,labelsize=18):
     ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b \n %Y'))
     ax.xaxis.set_minor_locator(mdates.MonthLocator(bymonth=[7]))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%b'))
-    ax.tick_prams(labelsize=labelsize)
+    ax.tick_params(labelsize=labelsize)
     return ax
 
 def DDlabel(ax,labelsize=18):
@@ -81,7 +86,7 @@ def DDlabel(ax,labelsize=18):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b \n %Y'))
     ax.xaxis.set_minor_locator(mdates.MonthLocator(bymonth=[7]))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%b'))
-    ax.tick_prams(labelsize=labelsize)
+    ax.tick_params(labelsize=labelsize)
     return ax
 
 def contourf(xx,yy,arr,div=20,clabelsize=14,powerlimits=(-1,3)):
@@ -150,4 +155,8 @@ def logcontourf(xx,yy,arr,subs=(1.0,),clabelsize=14,offsetTextsize=14):
     cbar.ax.tick_params(labelsize=clabelsize)
     cbar.ax.xaxis.offsetText.set_fontsize(offsetTextsize)
     return fig,ax
-
+def set_axis(ax,xlabel=' ',ylabel=' ',fontsize=14,labelsize=14):
+    ax.set_xlabel(xlabel,fontsize=fontsize)
+    ax.set_ylabel(ylabel,fontsize=fontsize)
+    ax.tick_params(labelsize=labelsize,which='both')
+    return ax
