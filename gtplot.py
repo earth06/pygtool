@@ -112,8 +112,8 @@ def contourf(xx,yy,arr,div=20,clabelsize=14,powerlimits=(-1,3)):
     ax=fig.add_subplot(1,1,1,projection=ccrs.PlateCarree(central_longitude=180))
     cax=fig.add_axes([0.25,0,0.5,0.05])
     ax=ckit.set_geogrid(ax)
-    delta=(arr.max()-arr.min())/(div)
-    interval=np.arange(arr.min(),abs(arr.max())*2 +delta,delta)[0:int(div)+1]
+    delta=(np.nanmax(arr)-np.nanmin(arr))/(div)
+    interval=np.arange(np.nanmin(arr),abs(np.nanmax(arr))*2 +delta,delta)[0:int(div)+1]
 
     cf=ax.contourf(xx,yy,arr
         ,levels=interval

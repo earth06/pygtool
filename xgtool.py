@@ -17,7 +17,6 @@ class gtXarray():
         lon,lat = pygtool_beta.readgrid(x=self.x
                                        ,y=self.y).getlonlat(cyclic=self.cyclic)
         self.head   = data.getheader()
-        self.sigma  = pygtool_beta.readalt(z=self.z).getsig()
         self.time   = data.getDatetimeIndex(freq=freq)
         self.arr    = data.to_dataarray(start=start,end=end,cyclic=self.cyclic)
         self.item   = self.head[2].decode().strip()
@@ -34,6 +33,7 @@ class gtXarray():
                                'lon'  : ('lon',lon,{'units':'degrees_east'})
             }
         else:
+            self.sigma  = pygtool_beta.readalt(z=self.z).getsig()
             self.src_dict    = {self.item:(['time','sigma','lat','lon'],self.arr)}
             self.coord_dict = {'time' :self.time,
                                'sigma':self.sigma,
