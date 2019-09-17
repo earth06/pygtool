@@ -1,5 +1,7 @@
 from numba import jit
 import numpy as np
+iso_p=np.array([1000,950,900,850,800,750,700,650,600,550,500,\
+                         450,400,350,300,250,200,150,100,50,25,10,1])
 
 
 @jit
@@ -17,8 +19,19 @@ def sig2isopiestic(data,p3d,convP,idim=128,jdim=64,kmax=36):
 
 
 def sig2isopiesticpy(data,p3d,convP=None,idim=128,jdim=64,kmax=36):
-    if(convP==None):
-        convP=np.array([1000,950,900,850,800,750,700,650,600,550,500,
+    """
+    interpolate sigma scaled array into isopiestic array
+    
+    Parameter
+    ----------
+    data :numpy.ndarray (sigma,lat,lon) target data
+    p3d  :numpy.ndarray (sigma,lat,lon) pressure
+    convP:array_like     new pressure scale
+
+    """
+
+    if(type(convP) != np.ndarray):
+        convP=np.array([1000,950,900,850,800,750,700,650,600,550,500,\
                          450,400,350,300,250,200,150,100,50,25,10,1])
     if(data.dtype != np.dtype('float64')):
         data=data.astype('float64')

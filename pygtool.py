@@ -5,9 +5,12 @@ import carto_kit as ckit
 import xarray as xr
 import pandas as pd
 import gtutil
-import gtplot 
+import gtplot
+import pathlib
 """
 """
+
+thisdir=str(pathlib.Path(__file__).resolve().parent)
 class read3D:
     """
     read gtool format data 
@@ -158,7 +161,7 @@ class readlon():
     tail2 = ("tail2",">i")
     def __init__(self,x=128):
         self.x=x
-        file='/home/onishi/GTAXDIR/GTAXLOC.GLON'+str(self.x)
+        file=thisdir+'/GTAXDIR/GTAXLOC.GLON'+str(self.x)
         data=open(file,'br')
         dt = np.dtype([self.head
                        ,("header",">64S16")
@@ -184,7 +187,7 @@ class readlat():
     tail2 = ("tail2",">i")
     def __init__(self,y=64):
         self.y=y
-        file='/home/onishi/GTAXDIR/GTAXLOC.GGLA'+str(self.y)
+        file=thisdir+'/GTAXDIR/GTAXLOC.GGLA'+str(self.y)
         data=open(file,'br')
         dt = np.dtype([self.head
                        ,("header",">64S16")
@@ -213,6 +216,11 @@ class readgrid():
         x,y=self.getlonlat(cyclic=cyclic)
         xx,yy=np.meshgrid(x,y)
         return xx,yy
+    def getmesh2(self):
+        y=readlat(self.y).getlat()
+        x=np.arange(1.40625,360.1,2.8125)
+        xx,yy=np.meshgrid(x,y)
+        return xx,yy
 
 
 class readalt():
@@ -227,7 +235,7 @@ class readalt():
     tail2 = ("tail2",">i")
     def __init__(self,z=36):
         self.z=z
-        file='/home/onishi/GTAXDIR/GTAXLOC.HETA'+str(self.z)
+        file=thisdir+'/GTAXDIR/GTAXLOC.HETA'+str(self.z)
         data=open(file,'br')
         dt = np.dtype([self.head
                        ,("header",">64S16")
@@ -309,4 +317,6 @@ def to_netcdf(lon,lat,datetime,arr
          
     )
     return ds
-
+if __name__ == '__main__':
+    print(str(thisdir))
+    

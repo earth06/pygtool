@@ -1,7 +1,7 @@
 import numpy as np
 
 month=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-season=['JJA','SON','DJF','MAM']
+season=['DJF','MAM','JJA','SON']
 mdays=[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 reg=[   'AMN', 'AMM', 'AMS', 'AFN', 'AFS',\
         'EUR', 'CEU', 'SBR', 'IND', 'CHN',\
@@ -13,6 +13,7 @@ tail2 = ("tail2",">i4")
 gthead = ("header",">64S16")
 
 ffmt=(head,tail,head2,tail2)
+mid_lon=np.arange(1.40625,360.1,2.8125)
 #def lonlabel(left=):
 
 #def latlabel(left=-90,right=90,dlat=30):
