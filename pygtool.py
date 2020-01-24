@@ -235,7 +235,14 @@ class readalt():
     tail2 = ("tail2",">i")
     def __init__(self,z=36):
         self.z=z
-        file=thisdir+'/GTAXDIR/GTAXLOC.HETA'+str(self.z)
+        if z==36:
+            file=thisdir+'/GTAXDIR/GTAXLOC.HETA'+str(self.z)
+        elif z==37:
+            file=thisdir+'/GTAXDIR/GTAXLOC.HETA'+str(self.z-1)+'.M'
+        elif z==57:
+            file=thisdir+'/GTAXDIR/GTAXLOC.CETA'+str(self.z)
+        elif z==58:
+            file=thisdir+'/GTAXDIR/GTAXLOC.CETA'+str(self.z-1)+'.M'
         data=open(file,'br')
         dt = np.dtype([self.head
                        ,("header",">64S16")

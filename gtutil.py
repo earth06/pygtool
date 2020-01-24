@@ -1,5 +1,5 @@
 import numpy as np
-
+import pandas as pd
 month=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 season=['DJF','MAM','JJA','SON']
 mdays=[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -34,8 +34,15 @@ def weighted_mean(arr,area):
     weighted_mean=(arr*area).sum()/area.sum()
     return weighted_mean
 
-
- 
+def get_area(dlon=2.5e0,dlat=2.5e0):
+    """
+    """
+    er=6370e3
+    xxtmp,yytmp=np.meshgrid(np.arange(0,360,dlon),np.arange(90,-90.1,-dlat))
+    area=(er**2)*(np.deg2rad(dlon)*(np.sin(np.deg2rad(yytmp[0:-1,:]))\
+                                  -np.sin(np.deg2rad(yytmp[1:,:])))\
+)
+    return area
 def corre_coef(x,y):
     """
     args  type
@@ -99,3 +106,49 @@ def min_max(x,axis=None):
     xmax =x.max(axis=axis,keepdims=True)
     result = (x-xmin)/(xmax-xmin)
     return result
+def read_nas(filename,header=False,na_values=-999):
+    """
+    reading nas file with skipping data
+    return pd.Dataframe
+
+    Parameter
+    ---------
+    filename :string
+    header   :boolean
+
+    Return
+    ---------
+    df             :pd.Dataframe
+    head(optional) :list
+    """
+    with open(filename,'tr') as data:
+        line1=data.readline()
+        row=int(line1.split(',')[0])
+        head=data.readlines()
+    df=pd.read_csv(filename,skiprows=row-1,na_values=na_values)
+    if header:
+        return df,head
+    else:
+        return df
+
+def normdate_to_datetime():
+    """
+    converting floating date into datetimeindex
+    """
+    
+    return
+def cmass_column(C,ps,T,timestep=0,zmax=36,fact=1.0e0,cyclic=False):
+    """
+    conduct vertical integration
+    This function should be weritten class
+    __init__() set sigma scaler.
+    """
+    P=aeta+beta*ps.getarr(timestep=timestep,cyclic=cyclic)*1e2
+    PM=aeta_M+beta_M*ps.getarr(timestep=timestep,cyclic=cyclic)*1e2
+    dp=PM[1:,:,:]-PM[:-1,:,:]
+    grav=9.8e0
+    rho=(P/287.0*T.getarr(timestep=timestep,cyclic=cyclic))
+    dz=dp/(rho*grav)
+    col3D=C.getarr(timestep=timestep,cyclic=cyclic)*dz
+    column=col3D[0:zmax,:,:].sum(axis=0)*fact
+    return colflux

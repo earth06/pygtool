@@ -90,7 +90,7 @@ def DDlabel(ax,labelsize=18):
     ax.tick_params(labelsize=labelsize)
     return ax
 
-def contourf(xx,yy,arr,div=20,clabelsize=14,powerlimits=(-1,3)):
+def contourf(xx,yy,arr,div=20,clabelsize=14,extend='both',levels=None,cmap='viridis',powerlimits=(-1,3),alpha=1):
     """
     Parameter
     ---------------
@@ -106,6 +106,7 @@ def contourf(xx,yy,arr,div=20,clabelsize=14,powerlimits=(-1,3)):
     ----------------
     fig
     ax
+    cbar
 
     """
     sformat.set_powerlimits((powerlimits))
@@ -113,11 +114,15 @@ def contourf(xx,yy,arr,div=20,clabelsize=14,powerlimits=(-1,3)):
     ax=fig.add_subplot(1,1,1,projection=ccrs.PlateCarree(central_longitude=180))
     cax=fig.add_axes([0.25,0,0.5,0.05])
     ax=ckit.set_geogrid(ax)
-    delta=(np.nanmax(arr)-np.nanmin(arr))/(div)
-    interval=np.arange(np.nanmin(arr),abs(np.nanmax(arr))*2 +delta,delta)[0:int(div)+1]
-
+    if levels is None:
+        delta=(np.nanmax(arr)-np.nanmin(arr))/(div)
+        levels=np.arange(np.nanmin(arr),abs(np.nanmax(arr))*2 +delta,delta)[0:int(div)+1]
+    
     cf=ax.contourf(xx,yy,arr
-        ,levels=interval
+        ,levels=levels
+        ,extend=extend
+        ,cmap=cmap
+        ,alpha=alpha
         ,transform=ccrs.PlateCarree())
     cbar=fig.colorbar(cf,cax
 #        ,ticks=interval[::2]
@@ -126,8 +131,10 @@ def contourf(xx,yy,arr,div=20,clabelsize=14,powerlimits=(-1,3)):
 
     cbar.ax.tick_params(labelsize=clabelsize)
     cbar.ax.xaxis.offsetText.set_fontsize(14)
-    return fig,ax
-def logcontourf(xx,yy,arr,subs=(1.0,),clabelsize=14,offsetTextsize=14):
+    return fig,ax,cbar
+def logcontourf(xx,yy,arr,subs=(1.0,),clabelsize=14,\
+vmin=None,vmax=None,\
+cmap='viridis',alpha=1,extend='both',offsetTextsize=14):
     """
     Parameter
     ---------------
@@ -136,7 +143,13 @@ def logcontourf(xx,yy,arr,subs=(1.0,),clabelsize=14,offsetTextsize=14):
             input data
     subs   :sequence of float 'all','auto',None,
            default=(1,) ex) (1.0,2.0) 
-
+    cmap   :string colormap
+    vmin   :float minimum value(default=arr.min())
+    vmax   :float maximum value(default=arr.max())
+    alpha  :float 0-1 (default=1)
+    extend :string {'max','min','both','neither'}
+    
+    
     Return
     ----------------
     fig
@@ -147,15 +160,25 @@ def logcontourf(xx,yy,arr,subs=(1.0,),clabelsize=14,offsetTextsize=14):
     ax=fig.add_subplot(1,1,1,projection=ccrs.PlateCarree(central_longitude=180))
     cax=fig.add_axes([0.25,0,0.5,0.05])
     ax=ckit.set_geogrid(ax)
-
-    cf=ax.contourf(xx,yy,arr
-        ,locator=ticker.LogLocator(subs=subs)
-        ,transform=ccrs.PlateCarree())
-    cbar=fig.colorbar(cf,cax
-        ,orientation='horizontal')
+    if vmin is None:
+        vmin=arr.min()
+    if vmax is None:
+        vmax=arr.max()
+    cf=ax.contourf(xx,yy,arr,
+        vmin=vmin,vmax=vmax,
+        cmap=cmap,
+        extend=extend,
+        alpha=alpha,
+        locator=ticker.LogLocator(subs=subs),
+        transform=ccrs.PlateCarree())
+    cbar=fig.colorbar(cf,cax,
+        extend=extend,
+        ticks=ticker.LogLocator(subs=(1.0,)),
+        format=ticker.LogFormatterSciNotation(),
+        orientation='horizontal')
     cbar.ax.tick_params(labelsize=clabelsize)
     cbar.ax.xaxis.offsetText.set_fontsize(offsetTextsize)
-    return fig,ax
+    return fig,ax,cbar
 def set_axis(ax,xlabel=' ',ylabel=' ',fontsize=14,labelsize=14):
     ax.set_xlabel(xlabel,fontsize=fontsize)
     ax.set_ylabel(ylabel,fontsize=fontsize)
